@@ -101,8 +101,8 @@ location /ddplay-api/ {
 }
 
 location /ddplay-api/api/v2/login {
+    rewrite ^/ddplay-api/api/v2/login(.*)$ /cors/https://api.dandanplay.net/api/v2/login$1 break;
     proxy_pass https://jellyfin-danmaku.pages.dev;
-    proxy_set_header Host $host;
 
     add_header Access-Control-Allow-Origin "example.com";
     add_header Access-Control-Allow-Methods "POST, OPTIONS";
@@ -134,18 +134,18 @@ example.com {
         header_up Accept-Encoding identity
     }
 
-    handle_path /ddplay-api/api/v2/login* {
-        reverse_proxy https://jellyfin-danmaku.pages.dev {
-            header_down Access-Control-Allow-Origin "example.com"
-            header_down Access-Control-Allow-Methods "POST, OPTIONS"
-            header_down Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization"
-        }
-    }
-
     handle_path /ddplay-api/* {
         reverse_proxy https://api.dandanplay.net {
             header_down Access-Control-Allow-Origin "example.com"
             header_down Access-Control-Allow-Methods "GET, POST, OPTIONS"
+            header_down Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization"
+        }
+    }
+    handle_path /ddplay-api/api/v2/login* {
+        rewrite * /cors/https://api.dandanplay.net{uri}
+        reverse_proxy https://jellyfin-danmaku.pages.dev {
+            header_down Access-Control-Allow-Origin "example.com"
+            header_down Access-Control-Allow-Methods "POST, OPTIONS"
             header_down Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization"
         }
     }
