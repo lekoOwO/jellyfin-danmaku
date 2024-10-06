@@ -287,7 +287,7 @@
                         window.ede.curEpOffset = epOffset;
                         showDebugInfo(`设置弹幕偏移时间：${window.ede.curEpOffset}`);
                     }
-                    window.ede.fontFamily = document.getElementById("danmakuFontFamily").value;
+                    window.ede.fontFamily = document.getElementById("danmakuFontFamily").value || "sans-serif";
                     window.localStorage.setItem('danmakuFontFamily', window.ede.fontFamily);
                     showDebugInfo(`字体：${window.ede.fontFamily}`);
                     window.ede.fontOptions = document.getElementById("danmakuFontOptions").value;
@@ -739,7 +739,7 @@
                         mode: modemap,
                         time: time,
                         style: {
-                            font: `${window.ede.fontSize}px "${window.ede.fontFamily}" ${window.ede.fontOptions}`,
+                            font: `${window.ede.fontOptions} ${window.ede.fontSize}px ${window.ede.fontFamily}`,
                             fillStyle: `#${colorStr}`,
                             strokeStyle: colorStr === '000000' ? '#fff' : '#000',
                             lineWidth: 2.0,
@@ -1164,6 +1164,8 @@
         showDebugInfo(`弹幕来源过滤：${window.ede.danmakuFilter}`);
         showDebugInfo(`弹幕模式过滤：${window.ede.danmakuModeFilter}`);
         showDebugInfo(`弹幕字号：${window.ede.fontSize}`);
+        showDebugInfo(`弹幕字体：${window.ede.fontFamily}`);
+        showDebugInfo(`弹幕字体选項：${window.ede.fontOptions}`);
         showDebugInfo(`屏幕分辨率：${window.screen.width}x${window.screen.height}`);
         if (window.ede.curEpOffset !== 0) showDebugInfo(`当前弹幕偏移：${window.ede.curEpOffset} 秒`);
 
@@ -1394,7 +1396,7 @@
     }
 
     function danmakuParser(all_cmts) {
-        const { fontSize, danmakuFilter, danmakuModeFilter, curEpOffset } = window.ede;
+        const { fontSize, fontOptions, fontFamily, danmakuFilter, danmakuModeFilter, curEpOffset } = window.ede;
 
         const disableBilibili = (danmakuFilter & 1) === 1;
         const disableGamer = (danmakuFilter & 2) === 2;
@@ -1442,7 +1444,7 @@
                     mode,
                     time: time + curEpOffset,
                     style: {
-                        font: `${fontSize}px "${window.ede.fontFamily}" ${window.ede.fontOptions}`,
+                        font: `${fontOptions} ${fontSize}px ${fontFamily}`,
                         fillStyle: `#${color}`,
                         strokeStyle: color === '000000' ? '#fff' : '#000',
                         lineWidth: 2.0,
