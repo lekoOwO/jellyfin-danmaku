@@ -85,21 +85,6 @@ location /ddplay-api/ {
     }
 }
 
-location /ddplay-api/ {
-    proxy_pass https://api.dandanplay.net/;
-    proxy_set_header Host $host;
-
-    add_header Access-Control-Allow-Origin "example.com";
-    add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
-    add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
-
-    if ($request_method = OPTIONS) {
-        add_header Content-Length 0;
-        add_header Content-Type text/plain;
-        return 204;
-    }
-}
-
 location /ddplay-api/api/v2/login {
     rewrite ^/ddplay-api/api/v2/login(.*)$ /cors/https://api.dandanplay.net/api/v2/login$1 break;
     proxy_pass https://jellyfin-danmaku.pages.dev;
