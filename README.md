@@ -71,24 +71,21 @@ sub_filter_once on;
 並加入新的 location 塊:
 ```conf
 location /ddplay-api/ {
-    proxy_pass https://api.dandanplay.net/;
+    proxy_pass https://api.dandanplay.net;
     proxy_set_header Host $host;
 
+    # 下傳的頭部設置
     add_header Access-Control-Allow-Origin "example.com";
     add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
     add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
-
-    if ($request_method = OPTIONS) {
-        add_header Content-Length 0;
-        add_header Content-Type text/plain;
-        return 204;
-    }
 }
 
 location /ddplay-api/api/v2/login {
     rewrite ^/ddplay-api/api/v2/login(.*)$ /cors/https://api.dandanplay.net/api/v2/login$1 break;
-    proxy_pass https://jellyfin-danmaku.pages.dev;
+    proxy_pass https://ddplay-api.930524.xyz;
+    proxy_set_header Host $host;
 
+    # 下傳的頭部設置
     add_header Access-Control-Allow-Origin "example.com";
     add_header Access-Control-Allow-Methods "POST, OPTIONS";
     add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
@@ -121,14 +118,16 @@ example.com {
 
     handle_path /ddplay-api/* {
         reverse_proxy https://api.dandanplay.net {
+            header_up Host {upstream_hostport}
             header_down Access-Control-Allow-Origin "example.com"
             header_down Access-Control-Allow-Methods "GET, POST, OPTIONS"
             header_down Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization"
         }
     }
     handle_path /ddplay-api/api/v2/login* {
-        rewrite * /cors/https://api.dandanplay.net{uri}
-        reverse_proxy https://jellyfin-danmaku.pages.dev {
+        rewrite * /cors/https://api.dandanplay.net/api/v2/login{http.request.uri.path}
+        reverse_proxy https://ddplay-api.930524.xyz {
+            header_up Host {upstream_hostport}
             header_down Access-Control-Allow-Origin "example.com"
             header_down Access-Control-Allow-Methods "POST, OPTIONS"
             header_down Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization"
