@@ -3,7 +3,7 @@
 // @description  Jellyfin弹幕插件
 // @namespace    https://github.com/RyoLee
 // @author       RyoLee
-// @version      1.47
+// @version      1.48
 // @copyright    2022, RyoLee (https://github.com/RyoLee)
 // @license      MIT; https://raw.githubusercontent.com/Izumiko/jellyfin-danmaku/jellyfin/LICENSE
 // @icon         https://github.githubassets.com/pinned-octocat.svg
@@ -158,6 +158,10 @@
                             <input style="width: 50%;" type="range" id="speed" min="20" max="600" step="10" value="${window.ede.speed || 200}" />
                         </div>
                         <div style="display: flex;">
+                            <label style="flex: auto;">字体:</label>
+                            <div><input style="flex-grow: 1;" id="danmakuFontFamily" placeholder="sans-serif" value="${window.ede.fontFamily ?? "sans-serif"}" /></div>
+                        </div>
+                        <div style="display: flex;">
                             <span id="lbfontSize" style="flex: auto;">字体大小:</span>
                             <input style="width: 50%;" type="range" id="fontSize" min="8" max="80" step="1" value="${window.ede.fontSize || 18}" />
                         </div>
@@ -279,6 +283,9 @@
                         window.ede.curEpOffset = epOffset;
                         showDebugInfo(`设置弹幕偏移时间：${window.ede.curEpOffset}`);
                     }
+                    window.ede.fontFamily = document.getElementById("danmakuFontFamily").value;
+                    window.localStorage.setItem('danmakuFontFamily', window.ede.fontFamily);
+                    showDebugInfo(`字体：${window.ede.fontFamily}`);
                     reloadDanmaku('reload');
                     closeModal();
                 } catch (e) {
@@ -480,6 +487,9 @@
             // 当前剧集弹幕偏移时间
             this.curEpOffset = 0;
             this.curEpOffsetModified = false;
+            // 字體
+            const fontFamily = window.localStorage.getItem('danmakuFontFamily');
+            this.fontFamily = fontFamily ?? "sans-serif";
 
             this.danmaku = null;
             this.episode_info = null;
@@ -719,7 +729,7 @@
                         mode: modemap,
                         time: time,
                         style: {
-                            font: `${window.ede.fontSize}px sans-serif`,
+                            font: `${window.ede.fontSize}px ${window.ede.fontFamily}`,
                             fillStyle: `#${colorStr}`,
                             strokeStyle: colorStr === '000000' ? '#fff' : '#000',
                             lineWidth: 2.0,
@@ -1422,7 +1432,7 @@
                     mode,
                     time: time + curEpOffset,
                     style: {
-                        font: `${fontSize}px sans-serif`,
+                        font: `${fontSize}px ${window.ede.fontFamily}`,
                         fillStyle: `#${color}`,
                         strokeStyle: color === '000000' ? '#fff' : '#000',
                         lineWidth: 2.0,
