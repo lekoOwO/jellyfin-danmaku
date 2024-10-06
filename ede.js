@@ -3,7 +3,7 @@
 // @description  Jellyfin弹幕插件
 // @namespace    https://github.com/RyoLee
 // @author       RyoLee
-// @version      1.48
+// @version      1.49
 // @copyright    2022, RyoLee (https://github.com/RyoLee)
 // @license      MIT; https://raw.githubusercontent.com/Izumiko/jellyfin-danmaku/jellyfin/LICENSE
 // @icon         https://github.githubassets.com/pinned-octocat.svg
@@ -166,6 +166,10 @@
                             <input style="width: 50%;" type="range" id="fontSize" min="8" max="80" step="1" value="${window.ede.fontSize || 18}" />
                         </div>
                         <div style="display: flex;">
+                            <label style="flex: auto;">其他字体选項:</label>
+                            <div><input style="flex-grow: 1;" id="danmakuFontOptions" placeholder="" value="${window.ede.fontOptions ?? ""}" /></div>
+                        </div>
+                        <div style="display: flex;">
                             <span id="lbheightRatio" style="flex: auto;">高度比例:</span>
                             <input style="width: 50%;" type="range" id="heightRatio" min="0" max="1" step="0.05" value="${window.ede.heightRatio || 0.9}" />
                         </div>
@@ -286,6 +290,9 @@
                     window.ede.fontFamily = document.getElementById("danmakuFontFamily").value;
                     window.localStorage.setItem('danmakuFontFamily', window.ede.fontFamily);
                     showDebugInfo(`字体：${window.ede.fontFamily}`);
+                    window.ede.fontOptions = document.getElementById("danmakuFontOptions").value;
+                    window.localStorage.setItem('danmakuFontOptions', window.ede.fontOptions);
+                    showDebugInfo(`字体选項：${window.ede.fontOptions}`);
                     reloadDanmaku('reload');
                     closeModal();
                 } catch (e) {
@@ -490,6 +497,9 @@
             // 字體
             const fontFamily = window.localStorage.getItem('danmakuFontFamily');
             this.fontFamily = fontFamily ?? "sans-serif";
+            // 字体选項
+            const fontOptions = window.localStorage.getItem('danmakuFontOptions');
+            this.fontOptions = fontOptions ?? "";
 
             this.danmaku = null;
             this.episode_info = null;
@@ -729,7 +739,7 @@
                         mode: modemap,
                         time: time,
                         style: {
-                            font: `${window.ede.fontSize}px ${window.ede.fontFamily}`,
+                            font: `${window.ede.fontSize}px "${window.ede.fontFamily}" ${window.ede.fontOptions}`,
                             fillStyle: `#${colorStr}`,
                             strokeStyle: colorStr === '000000' ? '#fff' : '#000',
                             lineWidth: 2.0,
@@ -1432,7 +1442,7 @@
                     mode,
                     time: time + curEpOffset,
                     style: {
-                        font: `${fontSize}px ${window.ede.fontFamily}`,
+                        font: `${fontSize}px "${window.ede.fontFamily}" ${window.ede.fontOptions}`,
                         fillStyle: `#${color}`,
                         strokeStyle: color === '000000' ? '#fff' : '#000',
                         lineWidth: 2.0,
