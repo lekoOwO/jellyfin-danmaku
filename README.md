@@ -64,8 +64,32 @@
 
 ```conf
 proxy_set_header Accept-Encoding "";
-sub_filter '</body>' '<script src="https://jellyfin-danmaku.pages.dev/ede.user.js" defer></script></body>';
+sub_filter '</body>' '<script src="https://jellyfin-danmaku.pages.dev/ede.user.js?noCors=1" defer></script></body>';
 sub_filter_once on;
+```
+
+並加入新的 location 塊:
+```conf
+location /ddplay-api/ {
+    proxy_pass https://api.dandanplay.net;
+    proxy_set_header Host $host;
+
+    # 下傳的頭部設置
+    add_header Access-Control-Allow-Origin "example.com";
+    add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
+    add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
+}
+
+location /ddplay-api/api/v2/login {
+    rewrite ^/ddplay-api/api/v2/login(.*)$ /cors/https://api.dandanplay.net/api/v2/login$1 break;
+    proxy_pass https://ddplay-api.930524.xyz;
+    proxy_set_header Host $host;
+
+    # 下傳的頭部設置
+    add_header Access-Control-Allow-Origin "example.com";
+    add_header Access-Control-Allow-Methods "POST, OPTIONS";
+    add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization";
+}
 ```
 
 - [`完整示例`](https://github.com/Izumiko/jellyfin-danmaku/issues/8)
@@ -88,17 +112,26 @@ example.com {
         replacement "<script src=\"https://jellyfin-danmaku.pages.dev/ede.user.js?noCors=1\" defer></script></body>"
         content_type text/html
     }
-    reverse_proxy / localhost:8096 {
+    reverse_proxy localhost:8096 {
         header_up Accept-Encoding identity
     }
 
-    reverse_proxy /ddplay-api/* https://api.dandanplay.net {
-        rewrite * /{path.1}
+    handle_path /ddplay-api/* {
+        reverse_proxy https://api.dandanplay.net {
+            header_up Host {upstream_hostport}
+            header_down Access-Control-Allow-Origin "example.com"
+            header_down Access-Control-Allow-Methods "GET, POST, OPTIONS"
+            header_down Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization"
+        }
     }
-    header /ddplay-api/* {
-        Access-Control-Allow-Origin "example.com"
-        Access-Control-Allow-Methods "GET, POST, OPTIONS"
-        Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization"
+    handle_path /ddplay-api/api/v2/login* {
+        rewrite * /cors/https://api.dandanplay.net/api/v2/login{http.request.uri.path}
+        reverse_proxy https://ddplay-api.930524.xyz {
+            header_up Host {upstream_hostport}
+            header_down Access-Control-Allow-Origin "example.com"
+            header_down Access-Control-Allow-Methods "POST, OPTIONS"
+            header_down Access-Control-Allow-Headers "Origin, Content-Type, Accept, Authorization"
+        }
     }
 }
 ```
